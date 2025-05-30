@@ -1,19 +1,15 @@
-import nextra from "nextra";
+import nextra from 'nextra'
 
-/**
- * @type {import('next').NextConfig}
- */
-const nextConfig = {
+// Set up Nextra with its configuration
+const withNextra = nextra({
+  // ... Add Nextra-specific options here
+})
+
+// Export the final Next.js config with Nextra included
+export default withNextra({
+  // Next.js config options here
   output: "export",
   images: {
-    unoptimized: true
-  },
-  distDir: "out",
-}
-
-const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
-});
-
-export default withNextra(nextConfig);
+    unoptimized: true,
+  }
+})
