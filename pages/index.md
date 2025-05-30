@@ -146,3 +146,4 @@ This is a public-facing DeFi app with its own frontend, branding, and on-chain s
 Built for the next generation of on-chain capital efficiency.
 
 Version: v1.0.0  
+-
