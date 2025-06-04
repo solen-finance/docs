@@ -1,6 +1,6 @@
-# EDUChain Yield Vault Protocol
+# Solen Protocol
 
-Welcome to the official documentation for the EDUChain Yield Vault Protocol — a suite of DeFi strategies built on top of the EDUChain ecosystem. This protocol leverages SailFish DEX and Blend Lending to deliver high-yield, capital-efficient strategies for $EDU, $USDT, and $sEDU holders.
+Welcome to the official documentation for the Solen Protocol — a suite of DeFi strategies built on top of the EDUChain ecosystem. This protocol leverages SailFish DEX and Blend Lending to deliver high-yield, capital-efficient strategies for $EDU, and $USDT holders.
 
 ## Overview
 
@@ -10,60 +10,12 @@ This is a public-facing DeFi app with its own frontend, branding, and on-chain s
 
 ## Key Features
 
-- Strategy-based vaults (EDU, USDT, sEDU)
+- Strategy-based vaults (EDU, USDT)
 - Automated recursive lending loops
 - Modular and configurable vaults
-- Oracle integration (for sEDU)
+- Oracle integration (for wsEDU)
 - Emergency pause and withdrawal controls
 - On-chain analytics: APY, LTV, earnings
-
-## Smart Contract Architecture (Developer Docs)
-
-### Vault Contracts
-
-- Modular vaults per strategy
-- Configurable parameters:
-  - Loop depth
-  - Max LTV
-  - Slippage tolerance
-- Supports:
-  - Deposits and withdrawals
-  - Strategy health checks
-  - Emergency pause/unwind functions
-
-### Blend Integration
-
-- Direct integration with Blend for:
-  - Lending market deposits
-  - Borrowing operations
-  - Claiming BLEND emissions
-
-### Oracle Support
-
-- Uses Stork Oracle or trusted source for sEDU/wstEDU price feeds
-- Accurate APY and LTV calculations per vault
-
-## Frontend Application (User-Facing)
-
-### App Features
-
-- Connect wallet (EDUChain compatible)
-- View vault metrics:
-  - Strategy APY
-  - LTV usage
-  - TVL and user-specific deposits
-  - Pending rewards
-- Deposit/withdraw interface
-- Reward claiming and compounding
-- Health factor display and warnings
-
-### Frontend Tech Stack
-
-- New standalone codebase (not part of EDU dashboard)
-- Hooks for fetching:
-  - Strategy metadata (APY, LTV, slippage)
-  - On-chain vault stats (TVL, earnings, utilization)
-  - User positions
 
 ## Vault Strategies
 
@@ -106,44 +58,139 @@ This is a public-facing DeFi app with its own frontend, branding, and on-chain s
   3. Deposit to Blend
   4. Borrow $EDU and loop
 - Yield Sources:
-  - Real yield (USDC) from sEDU staking
+  - Real yield (USDC) from wsEDU staking
   - BLEND emissions on lending and borrowing
 - Requirements:
-  - Blend must support $sEDU as collateral
-  - Oracle pricing for $sEDU
+  - Blend must support $wsEDU as collateral
+  - Oracle pricing for $wsEDU
 
-## Dev and Infra Requirements
+## 🛠️ Tech
 
-### Contract Requirements
+---
 
-- Modular, upgradeable vault contracts
-- Emergency unwind and withdrawal cap mechanisms
-- Integration with Blend (deposit, borrow, repay, claim)
-- Oracle consumption for dynamic LTV and APY
+### 🧮 Points
 
-### Frontend Requirements
+- **TBD**: Decide how to distribute Blend points.
+  - If we handle distribution, we’ll need our own internal points system.
+- **Q**: Do we want to build our own points system?
 
-- Dedicated dApp UI (separate repo)
-- Hooks for fetching on-chain data (TVL, APY, rewards)
-- Real-time vault health metrics
-- Connected wallet UX and reward claiming
+---
 
-## Governance and Admin Controls
+### 🖥️ Frontend
 
-- Admin: Deployer multisig (initially)
-- Controls:
-  - Set vault parameters (LTV, slippage)
-  - Pause or unpause vaults
-  - Trigger emergency withdrawal or unwind
+- **Browse Strategies**
+  - Display TVL
+  - Underlying asset (e.g. EDU, USDT)
+  - Current APY
+  - Target leverage
 
-## Next Steps
+- **Vault Page**
+  - View user vault position: current & target leverage
+  - Deposit / Withdraw functionality  
+    - **Q**: For withdrawals, do users input shares or an exact amount?
+  - Show current user position
+  - Historical APY  
+    - Can fetch from Aave + calculate locally?
 
-- Finalize custody model: vault-controlled vs. multisig
-- Confirm $sEDU collateral support on Blend
-- Begin contract deployment and audit
-- Launch frontend with EDU and USDT vaults first
+- Data source:  
+  [Goldsky Subgraph](https://api.goldsky.com/api/public/project_cm040smxin6ju01x481kh0o8l/subgraphs/blend-edu/1.0.3/gn)
 
-Built for the next generation of on-chain capital efficiency.
+---
 
-Version: v1.0.0  
--
+### 🧾 Contracts
+
+- Contract is based on **ERC4626**
+  - Most functions behave like a standard ERC4626 vault
+  - Should be **upgradeable** in case we need logic changes
+
+- **Vault Rebalancing**
+  - On deposit/withdraw, vault should rebalance to target leverage
+    - This could increase or decrease overall leverage
+  - Permit-based deposits not supported (WEDU/USDT don’t support permit)
+  - **Q**: What happens if supply/borrow cap is hit?
+
+- **View Functions**
+  - `totalAssets()` → Return net position on Aave + idle funds in vault
+  - No caps for maxDeposit / maxRedeem etc.
+
+- **Public Functions**
+  - `rebalance()` → Keeper can trigger rebalancing to target leverage
+
+- **Admin Functions**
+  - `setLeverage()` → Adjust target leverage  
+  - `pause()` / `unpause()` → Disable/enable deposits or withdrawals  
+  - `freeze()` → Stop sending funds to Aave  
+    - **Q**: Should we still allow deposits if Aave is frozen?  
+  - `unwind()` → Unwind all positions back to the vault (e.g. in case of a hack)  
+  - `rescue()` → **Q**: Do we want an emergency admin withdrawal feature?
+
+- **Q**: Should we split permissions for each admin function?
+  - Would be a nice-to-have for security.
+
+---
+
+
+
+## 🌞 Solen – Brand Identity & UI/UX Direction
+
+Solen is the official name and emerging brand behind the EDUChain Yield Vault Protocol — a DeFi app built for clarity, capital efficiency, and approachable yield farming.
+
+---
+
+### 🔖 Brand Concept
+
+**Solen** blends *“Sol”* (sun) with *“Lens”*, evoking ideas of light, focus, and radiant clarity. It reflects the protocol’s core pillars:
+
+- **Clarity** — intuitive DeFi strategies made simple
+- **Precision** — engineered performance with focused capital loops
+- **Warmth & Trust** — brand visuals feel calm, solar, and optimistic
+
+---
+
+### 🧬 Visual Language
+
+| Element        | Direction |
+|----------------|-----------|
+| **Logo**       | Abstract sun + lens aperture. Visual identity rooted in solar energy, cycles, and focus. Clean, scalable for token/icon use. |
+| **Typography** | Body: Inter / Manrope; Headers: Space Grotesk / Satoshi — clear and strong with a modern edge |
+| **Color Palette** | Base: Soft ivory / beige; Accent: Gold, solar yellow, deep muted blue; Dark mode: Midnight with warm glows (not neon) |
+| **Style References** | Inspired by Veda, Mirra, and YieldLayer — minimal, confident, and performance-oriented |
+| **Icons** | Orbital / radial-style icons, slightly rounded — metaphors of gravity, light paths, or energy cycles |
+| **Animations** | Soft radial expansions, glowing hover effects, gentle lens blur transitions (like light focusing) |
+
+
+---
+
+### 💡 Brand Tone & Copy
+
+- **Taglines:**
+  - “Earn with clarity.”
+  - “Let your assets orbit smarter.”
+  - “DeFi strategies that shine.”
+  - “Passive yield, crystal clear.”
+
+- **Tone:**
+  - Calm and confident, with light poetic language
+  - Prioritizes simplicity and transparency over jargon
+  - Keywords: *solar, clarity, loop, light, lens, yield, orbit, smooth, efficient*
+
+---
+
+### 🖥 UI Style Goals
+
+- **Default Theme:** Light mode with soft sunlit vibes
+- **Layout:** Grid-based with space to breathe, mirrors the structure of lens elements
+- **Feel:** Intentionally minimal — prioritizes numbers and feedback over gamification
+- **Responsiveness:** Optimized for desktop first, with mobile-friendly resizing for actions (deposit, view vault, claim rewards)
+
+---
+
+### 📦 Design Deliverables
+
+- ✅ Logo & favicon (SVG + PNG variants)
+- ✅ Brand guide (colors, typography, component styles)
+- ✅ Figma: landing page, app interface (vaults list, detail, deposit/withdraw flow)
+- ✅ Component library (buttons, tags, cards, metrics boxes)
+- ✅ Responsive UI specs and animation examples
+
+Solen is positioned as the “quietly powerful” yield protocol — not trying to yell, just trying to work.
