@@ -1,135 +1,171 @@
-# Solen Protocol
+# 🌞 Solen Protocol
 
-Welcome to the official documentation for the Solen Protocol — a suite of DeFi strategies built on top of the EDUChain ecosystem. This protocol leverages SailFish DEX and Blend Lending to deliver high-yield, capital-efficient strategies for $EDU, and $USDT holders.
+Welcome to the official documentation for the **Solen Protocol** — a suite of DeFi strategies built on top of the EDUChain ecosystem. This protocol leverages **SailFish DEX** and **Blend Lending** to deliver high-yield, capital-efficient strategies for **$EDU** and **$USDT** holders.
 
-## Overview
+---
+
+## 🧭 Overview
 
 The Yield Vault Protocol provides automated vaults where users can deposit assets and earn yield through recursive lending strategies and token incentives. Each vault is isolated, transparent, and optimized for capital efficiency and safety.
 
 This is a public-facing DeFi app with its own frontend, branding, and on-chain smart contracts.
 
-## Key Features
+---
 
-- Strategy-based vaults (EDU, USDT)
+## 🔑 Key Features
+
+- Strategy-based vaults ($EDU, $USDT)
 - Automated recursive lending loops
 - Modular and configurable vaults
-- Oracle integration (for wsEDU)
+- Oracle integration (for wstEDU)
 - Emergency pause and withdrawal controls
 - On-chain analytics: APY, LTV, earnings
 
-## Vault Strategies
+---
+
+## 🏦 Vault Strategies
 
 ### Vault A: EDU Lending Loop (Vanilla)
 
-- Input Asset: $EDU
-- Looping Steps:
-  1. Deposit $EDU into Blend
-  2. Borrow $EDU (around 55% LTV)
-  3. Re-deposit borrowed $EDU
-  4. Repeat until target leverage (approximately 2.2x)
-- Yield Sources:
-  - 5% BLEND rewards on deposits
-  - 5% BLEND rewards on borrows
-  - Estimated APY: ~17%
-- Output:
-  - BLEND token rewards (claimable or stakeable)
+- **Input Asset:** $EDU
 
-### Vault B: USDT Positive Carry Loop (Stablecoin Strategy)
+**Looping Steps**
+1. Deposit $EDU into Blend
+2. Borrow $EDU (around 55% LTV)
+3. Re-deposit borrowed $EDU
+4. Repeat until target leverage (≈ 2.2x)
 
-- Input Asset: $USDT
-- Looping Steps:
-  1. Deposit $USDT into Blend
-  2. Borrow $USDT (around 75% LTV)
-  3. Re-deposit borrowed $USDT
-  4. Repeat until target leverage (approximately 4x)
-- Yield Sources:
-  - 2.5% BLEND rewards on deposits
-  - 2.5% BLEND rewards on borrows
-  - Estimated APY: ~17.5%
-- Output:
-  - BLEND token rewards (claimable or stakeable)
+**Yield Sources**
+- 5% BLEND rewards on deposits
+- 5% BLEND rewards on borrows  
+**Estimated APY:** ~17%
 
-### Vault C: sEDU Leverage Vault (Advanced Strategy)
-
-- Input Asset: $EDU (converted to $sEDU and then to $wstEDU)
-- Mechanism:
-  1. Stake $EDU to receive $sEDU
-  2. Convert $sEDU to $wstEDU
-  3. Deposit to Blend
-  4. Borrow $EDU and loop
-- Yield Sources:
-  - Real yield (USDC) from wsEDU staking
-  - BLEND emissions on lending and borrowing
-- Requirements:
-  - Blend must support $wsEDU as collateral
-  - Oracle pricing for $wsEDU
-
-## 🛠️ Tech
+**Output**
+- BLEND token rewards (claimable or stakeable)
 
 ---
 
-### 🧮 Points
+### Vault B: USDT Positive Carry Loop (Stablecoin Strategy)
 
-- **TBD**: Decide how to distribute Blend points.
-  - If we handle distribution, we’ll need our own internal points system.
-- **Q**: Do we want to build our own points system?
+- **Input Asset:** $USDT
+
+**Looping Steps**
+1. Deposit $USDT into Blend
+2. Borrow $USDT (around 75% LTV)
+3. Re-deposit borrowed $USDT
+4. Repeat until target leverage (≈ 4x)
+
+**Yield Sources**
+- 2.5% BLEND rewards on deposits
+- 2.5% BLEND rewards on borrows  
+**Estimated APY:** ~17.5%
+
+**Output**
+- BLEND token rewards (claimable or stakeable)
+
+---
+
+### Vault C: sEDU Leverage Vault (Advanced Strategy)
+
+- **Input Asset:** $EDU → $sEDU → $wstEDU
+
+**Mechanism**
+1. Stake $EDU to receive $sEDU
+2. Convert $sEDU to $wstEDU
+3. Deposit $wstEDU into Blend
+4. Borrow $EDU and loop
+
+**Yield Sources**
+- Real yield (**USDT**) from wstEDU staking
+- BLEND emissions on lending and borrowing
+
+**Requirements**
+- Blend must support $wstEDU as collateral
+- Oracle pricing for $wstEDU
+
+---
+
+## 🛠️ Tech
+
+### 🧪 Points
+
+- We will have our own points system, but will deploy it after launch.
+- We'll retroactively allocate points based on historical vault activity.
+- We will **not** manage $BLEND token distribution ourselves.  
+- Instead, we will instruct Blend to route $BLEND rewards to user EOAs.
+
+**To finalize:**
+- Reward routing details
+- Frequency of $BLEND distributions
 
 ---
 
 ### 🖥️ Frontend
 
-- **Browse Strategies**
-  - Display TVL
-  - Underlying asset (e.g. EDU, USDT)
-  - Current APY
-  - Target leverage
+#### Browse Strategies
 
-- **Vault Page**
-  - View user vault position: current & target leverage
-  - Deposit / Withdraw functionality  
-    - **Q**: For withdrawals, do users input shares or an exact amount?
-  - Show current user position
-  - Historical APY  
-    - Can fetch from Aave + calculate locally?
+- Display TVL
+- Underlying asset (e.g. EDU, USDT)
+- Current APY
+- Target leverage
 
-- Data source:  
-  [Goldsky Subgraph](https://api.goldsky.com/api/public/project_cm040smxin6ju01x481kh0o8l/subgraphs/blend-edu/1.0.3/gn)
+#### Vault Page
 
----
+- View user vault position: current & target leverage
+- Deposit / Withdraw functionality  
+  > Withdrawals are based on **vault share units**, not USD or token amount
+- Show current user position
+- Show historical APY  
+  > Net APY = BLEND rewards - borrow rate
+- Use graph-based visualization (like Drift Fuel Vault UI)
 
-### 🧾 Contracts
-
-- Contract is based on **ERC4626**
-  - Most functions behave like a standard ERC4626 vault
-  - Should be **upgradeable** in case we need logic changes
-
-- **Vault Rebalancing**
-  - On deposit/withdraw, vault should rebalance to target leverage
-    - This could increase or decrease overall leverage
-  - Permit-based deposits not supported (WEDU/USDT don’t support permit)
-  - **Q**: What happens if supply/borrow cap is hit?
-
-- **View Functions**
-  - `totalAssets()` → Return net position on Aave + idle funds in vault
-  - No caps for maxDeposit / maxRedeem etc.
-
-- **Public Functions**
-  - `rebalance()` → Keeper can trigger rebalancing to target leverage
-
-- **Admin Functions**
-  - `setLeverage()` → Adjust target leverage  
-  - `pause()` / `unpause()` → Disable/enable deposits or withdrawals  
-  - `freeze()` → Stop sending funds to Aave  
-    - **Q**: Should we still allow deposits if Aave is frozen?  
-  - `unwind()` → Unwind all positions back to the vault (e.g. in case of a hack)  
-  - `rescue()` → **Q**: Do we want an emergency admin withdrawal feature?
-
-- **Q**: Should we split permissions for each admin function?
-  - Would be a nice-to-have for security.
+**Data source:**  
+[Goldsky Subgraph](https://api.goldsky.com/api/public/project_cm040smxin6ju01x481kh0o8l/subgraphs/blend-edu/1.0.3/gn)
 
 ---
 
+### 📟 Contracts
 
+#### ERC4626 Base
+
+- Standard ERC4626 functions
+- Upgradeable architecture
+
+#### Vault Rebalancing
+
+- Auto-rebalances to target leverage on deposit/withdraw
+- If supply/borrow cap is hit:
+  - Accept deposit
+  - Hold idle asset in vault
+  - Coordinate with Blend to raise caps
+
+#### Operations Controls
+
+- `pauseDeposits()` — stop new deposits
+- `pauseWithdrawals()` — stop withdrawals
+- `unwind()` — remove all funds from Blend
+- `pauseTrading()` — stop Blend interaction but allow vault operations
+
+#### Admin Functions
+
+- `setLeverage()` — Adjust target leverage
+- `pause()` / `unpause()`
+- `unwind()` — Global unwind
+- `rescue()` — Emergency admin withdrawal
+- **Role-based permissions**: Optional for v1, recommended later
+
+#### Withdrawals Disclaimer
+
+> Withdrawals are processed instantly, unless the underlying protocol is fully utilized. This is rare, but possible.  
+(Similar to Summer.fi language)
+
+---
+
+## 🎨 UI Design (Figma)
+
+[📐 View Figma Design](https://www.figma.com/design/hx0IM973rydqYOzvVb8KsO/EDUChain-Yield-Vault-dApp?node-id=0-1&t=sbCFv8grKbs0eAdq-1)
+
+---
 
 ## 🌞 Solen – Brand Identity & UI/UX Direction
 
@@ -139,58 +175,61 @@ Solen is the official name and emerging brand behind the EDUChain Yield Vault Pr
 
 ### 🔖 Brand Concept
 
-**Solen** blends *“Sol”* (sun) with *“Lens”*, evoking ideas of light, focus, and radiant clarity. It reflects the protocol’s core pillars:
+**Solen** = "Sol" (sun) + "Lens" → evokes clarity, light, focus
 
-- **Clarity** — intuitive DeFi strategies made simple
-- **Precision** — engineered performance with focused capital loops
-- **Warmth & Trust** — brand visuals feel calm, solar, and optimistic
+- **Clarity** – intuitive strategies
+- **Precision** – capital efficiency
+- **Warmth & Trust** – solar, optimistic visuals
 
 ---
 
 ### 🧬 Visual Language
 
-| Element        | Direction |
-|----------------|-----------|
-| **Logo**       | Abstract sun + lens aperture. Visual identity rooted in solar energy, cycles, and focus. Clean, scalable for token/icon use. |
-| **Typography** | Body: Inter / Manrope; Headers: Space Grotesk / Satoshi — clear and strong with a modern edge |
-| **Color Palette** | Base: Soft ivory / beige; Accent: Gold, solar yellow, deep muted blue; Dark mode: Midnight with warm glows (not neon) |
-| **Style References** | Inspired by Veda, Mirra, and YieldLayer — minimal, confident, and performance-oriented |
-| **Icons** | Orbital / radial-style icons, slightly rounded — metaphors of gravity, light paths, or energy cycles |
-| **Animations** | Soft radial expansions, glowing hover effects, gentle lens blur transitions (like light focusing) |
-
+| Element | Direction |
+|--------|-----------|
+| **Logo** | Abstract sun + lens aperture. Clean, scalable, energy cycles. |
+| **Typography** | Inter / Manrope for body, Space Grotesk / Satoshi for headers. |
+| **Color Palette** | Ivory, beige, solar gold, muted blue, midnight dark mode. |
+| **Style References** | Veda, Mirra, YieldLayer — confident minimalism. |
+| **Icons** | Radial/orbital metaphors — gravity, light cycles. |
+| **Animations** | Glowing hovers, radial expansions, lens blur transitions. |
 
 ---
 
 ### 💡 Brand Tone & Copy
 
-- **Taglines:**
-  - “Earn with clarity.”
-  - “Let your assets orbit smarter.”
-  - “DeFi strategies that shine.”
-  - “Passive yield, crystal clear.”
+#### Taglines
 
-- **Tone:**
-  - Calm and confident, with light poetic language
-  - Prioritizes simplicity and transparency over jargon
-  - Keywords: *solar, clarity, loop, light, lens, yield, orbit, smooth, efficient*
+- “Earn with clarity.”
+- “Let your assets orbit smarter.”
+- “DeFi strategies that shine.”
+- “Passive yield, crystal clear.”
+
+#### Tone
+
+- Calm, confident, poetic
+- Prioritizes simplicity and transparency
+- Keywords: *solar, clarity, loop, light, lens, yield, orbit, smooth, efficient*
 
 ---
 
 ### 🖥 UI Style Goals
 
-- **Default Theme:** Light mode with soft sunlit vibes
-- **Layout:** Grid-based with space to breathe, mirrors the structure of lens elements
-- **Feel:** Intentionally minimal — prioritizes numbers and feedback over gamification
-- **Responsiveness:** Optimized for desktop first, with mobile-friendly resizing for actions (deposit, view vault, claim rewards)
+- **Theme:** Light mode with warm, soft sunlit tones
+- **Layout:** Grid-based, open and breathable
+- **Feel:** Minimal and focused on real data
+- **Responsive:** Optimized for desktop, mobile-friendly flows
 
 ---
 
 ### 📦 Design Deliverables
 
-- ✅ Logo & favicon (SVG + PNG variants)
-- ✅ Brand guide (colors, typography, component styles)
-- ✅ Figma: landing page, app interface (vaults list, detail, deposit/withdraw flow)
-- ✅ Component library (buttons, tags, cards, metrics boxes)
-- ✅ Responsive UI specs and animation examples
+- ✅ Logo & favicon (SVG + PNG)
+- ✅ Brand guide (colors, typography, components)
+- ✅ Figma (landing page, vault UI, deposit flow)
+- ✅ Component library (buttons, tags, metrics)
+- ✅ Responsive UI & animation examples
 
-Solen is positioned as the “quietly powerful” yield protocol — not trying to yell, just trying to work.
+---
+
+Solen is the **“quietly powerful”** DeFi protocol — not trying to yell, just trying to work.
