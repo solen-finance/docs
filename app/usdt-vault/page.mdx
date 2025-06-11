@@ -1,0 +1,198 @@
+# USDT Staking Vault – EDUChain
+
+## 🎯 Goals
+
+1. **Increase Stablecoin TVL on EDUChain**
+   - Attract USDT/USDC from Arbitrum and other chains.
+   - Users mint OCUSD on EDUChain using bridged stables.
+   - Consider restricting withdrawals of OCUSD to EDUChain only (to encourage liquidity retention).
+
+2. **Deliver Sustainable Yield for Stablecoin Holders**
+   - Deploy bridged USDT/USDC into off-chain or L2 strategies (e.g. Ethena, USDX).
+   - Return yield manually via REWARDER_ROLE calls to on-chain vaults.
+
+---
+
+## 📝 Product Concept
+
+Users deposit USDT/USDC → mint **OCUSD** → stake OCUSD → earn yield from externally deployed strategies.
+
+This follows a similar model to [Ethena](https://www.notion.so/Ethena-Fork-EDUChain-1fa4928fd54f80e88bf7d39fd40af362?pvs=21) or USDX.
+
+---
+
+## 🔑 Key Features
+
+- **ERC20 Stablecoin: OCUSD**
+  - Minted from USDT or USDC
+  - Redeemable via cooldown process
+
+- **ERC4626 Vault: sOCUSD**
+  - Yield-bearing token (capital appreciating)
+  - Requires cooldown + `claim()` flow
+
+- **Manual Yield Streaming**
+  - Yield streamed by multisig/backend using `transferInRewards()`
+  - Controlled by `REWARDER_ROLE`
+
+- **Governance Parameters**
+  - Fee configuration, minter roles, pause, blacklists
+
+---
+
+## 📋 Tasks
+
+### Protocol Review
+- ✅ Review Ethena/USDX contracts
+- ✅ Identify licensing issues (none for Ethena/USDX)
+- ✅ Confirm staking vault and minting logic
+
+### Architecture & Product Design
+- 🔲 Decide if redemption occurs on Arbitrum or EDUChain
+- 🔲 Define OCUSD mint/redeem cooldown UX
+- 🔲 Model backend off-chain yield strategy (e.g. Ethena → USDT yield)
+
+### Contract Implementation
+- 🔲 Mintable ERC20 (OCUSD)
+- 🔲 ERC4626 vault (sOCUSD)
+- 🔲 Yield reward injection mechanism
+- 🔲 Cooldown logic with `claim()`
+
+### Backend / Admin
+- 🔲 Script for streaming rewards periodically
+- 🔲 NAV tracking or off-chain dashboard
+- 🔲 Admin panel for pause, fees, governance changes
+
+---
+
+## 🧪 Fork Options Comparison
+
+| Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Comments               |
+|----------|----------------|----------------|----------|----------------|---------|------------------------|
+| Ethena   | ✅             | ✅             | ✅       | ✅             | None    | Preferred – robust     |
+| USDX     | ✅             | ✅             | ✅       | ✅             | None    | Viable fork target     |
+| Anzen    | ✅             | ✅             | ❌       | ❌             | Unknown | Less control           |
+| USDa     | ❌             | ✅ (sUSDa)     | ✅       | Partial        | Unknown | Limited mint access    |
+
+---
+
+> 🟨 **Priority: Medium**
+>
+> This is an R&D product track that could evolve into a flagship offering for attracting yield-seeking stables to EDUChain.
+
+---
+
+## 🔧 Smart Contract Requirements
+
+### ERC20 Contract (OCUSD)
+
+**P0 (Must Have):**
+- Mintable only by a permissioned address
+- `isMinter` role management
+- Burn/redemption function
+- Governance params: blacklist (optional), pause
+
+**P1 (Nice to Have):**
+- OFT-compatible (LayerZero)
+
+---
+
+### ERC20 Minting/Sales Contract
+
+**P0 (Must Have):**
+- `buy()`, `claim()`, `redeem()` / `cooldown()` methods
+- Fee config
+- Settable cooldown time
+- List of supported stablecoins
+
+**Examples:**
+- USDX Sale Contract: `0xb45c42Fbf8AF8Df5A1fa080A351E9B2F8e0a56D1`
+
+---
+
+### ERC4626 Vault Contract (sOCUSD / sEDU)
+
+**P0 (Must Have):**
+- Cooldown initiation (`cooldownAssets()` or `cooldownShares()`)
+- Claim after cooldown (`unstake()` or `claim()`)
+- `previewWithdraw()` or `getAmountByShares()`
+- `REWARDER_ROLE` with `transferInRewards()`
+- Configurable governance params
+
+---
+
+## 🖥️ UI/UX Requirements
+
+### Mint/Buy Page
+
+**Inspiration:**
+- USDX, Ethena, Avalon, Anzen
+
+**Features:**
+- Swap USDT/USDC for OCUSD
+- Live conversion rate, user balances
+- Wallet integration, gas estimator
+
+---
+
+### Stake Page (sOCUSD)
+
+**Inspiration:**
+- Ethena Earn, USDX Stake
+
+**Features:**
+- Stake OCUSD → sOCUSD
+- Show APY, rewards, duration
+- Cooldown + claim support
+- NAV and yield tracking
+
+---
+
+### EDU Stake Page (sEDU)
+
+**Inspiration:**
+- Mycelium Stake
+
+**Features:**
+- Stake EDU → sEDU (non-rebasing)
+- Track real-time yield
+- Display DeFi integrations (leverage)
+- Configurable cooldown period
+
+---
+
+### Collateral Backing Page (V2)
+
+**Inspiration:**
+- USDX Dashboard
+
+**Features:**
+- Total OCUSD collateral breakdown
+- External yield strategies & NAV
+- Governance-controlled fund transparency
+
+---
+
+## 🔄 User Flow
+
+### USDT/USDC Users
+
+1. Deposit → receive OCUSD
+2. Stake OCUSD → receive sOCUSD
+3. Earn yield via vaults
+4. Initiate cooldown → call `claim()` → withdraw
+
+### EDU Users
+
+1. Stake EDU → receive sEDU (capital-appreciating LST)
+2. Use sEDU in recursive DeFi
+3. Unstake after cooldown to exit
+
+---
+
+## 📚 References
+
+- [User Journey](https://www.notion.so/USDC-USDT-EDU-Staking-Product-1ab4928fd54f803ba3a7de71db203000?pvs=21)
+- [Figma UI](https://www.figma.com/design/xk5z81PtVXToSb7WBqYUrq/EDU-Chain-projects?node-id=264-3195)
+- [Legal Brief](https://www.notion.so/EDUChain-Staking-Product-Legal-Brief-1-1fa4928fd54f803fb750e3a587e18ec0?pvs=21)
+- [Rings Reference](https://rings.money/?ref=blog.soniclabs.com)
