@@ -11,94 +11,102 @@
 
 2. **Deliver Sustainable Yield for Stablecoin Holders**
    - Deploy bridged stables into off-chain or L2 strategies.
-   - Return yield via `REWARDER_ROLE` calls to on-chain vaults.
+   - Return yield manually via `REWARDER_ROLE` calls to on-chain vaults.
 
 ---
 
 ## 📝 Product Concept
 
-Users deposit USDT/USDC → mint OCUSD → stake OCUSD → earn yield from externally deployed strategies.
+Users deposit USDT → mint OCUSD → stake OCUSD → earn yield from externally deployed strategies like USDX.  
+Yield is not streamed directly to users, but accumulates in the vault, increasing sOCUSD’s value over time.
+
+- **Minting** can occur on **EDUChain or Arbitrum**
+- **Redemption** is only available on **EDUChain**
 
 ---
 
 ## 🔑 Key Features
 
 - **OCUSD (ERC20 Stablecoin)**
-  - Minted from USDT or USDC
+  - Minted from USDT
   - Redeemable with cooldown
+  - Minting restricted to whitelisted stablecoin types (USDT only on Day 1)
 
 - **sOCUSD (ERC4626 Vault Token)**
-  - Capital-appreciating yield-bearing token
-  - Cooldown and claim process
+  - Yield-bearing, capital-appreciating token
+  - Cooldown + claim process for redemptions
+  - Accumulated rewards reflected in increasing share value
 
 - **Manual Yield Streaming**
-  - Yield streamed by multisig/backend using `transferInRewards()`
-  - Controlled via `REWARDER_ROLE`
+  - External yield is deposited to the vault manually via `transferInRewards()`
+  - Controlled by `REWARDER_ROLE` (multisig or backend agent)
 
 - **Governance Parameters**
-  - Fee configuration, minter roles, pause, blacklist
+  - Configurable fees
+  - Admin/minter role controls
+  - Blacklist and pause functionality
+
+- **Async Redemption**
+  - Redemptions delayed (e.g. 24h) to prevent oracle mismatch arbitrage and enable backend unwinding of positions
 
 ---
 
-## 🧩 Strategy Management Requirements
+## 🧩 Strategy Management
 
 ### Day 1 Setup
-- Use a single yield source to simplify operational load.
+- Use a single yield strategy: **USDX** (requires USDT input)
 
 ### Future Flexibility
-- Add support for multiple yield sources.
-- Allow dynamic addition and deprecation of yield strategies.
+- Ability to:
+  - Add new yield strategies
+  - Deprecate or disable old ones
+  - Reallocate funds between strategies
 
 ### Architecture
-- Abstract strategy interface for all yield sources.
-- Strategy registry or controller to manage:
-  - Enabled/disabled status
-  - Routing of deposits and withdrawals
+- Strategy registry or controller contract
+- Strategy interface for plug-and-play backends
+- Admin-governed list of active yield sources
 
 ### Governance
-- Admin-configurable strategy list.
-- Access controlled via role-based permissions (e.g. `REWARDER_ROLE`).
-
-### Operational Capabilities
-- Migrate funds between strategies.
-- Perform health and safety checks during transitions.
+- Managed via `REWARDER_ROLE` and other role-based permissions
+- NAV tracking and strategy enable/disable toggles
 
 ---
 
 ## 📋 Task Overview
 
 ### Protocol Review
-- ✅ Review Ethena/USDX contracts
-- ✅ Confirm no licensing issues
-- ✅ Confirm minting and staking logic
+- ✅ Review USDX, Ethena, and other strategy options
+- ✅ Confirm licensing is permissive
+- ✅ Validate staking vault logic
 
 ### Architecture / Product
-- 🔲 Finalize redemption chain (Arbitrum vs EDUChain)
-- 🔲 UX flow for cooldown and redemption
-- 🔲 Model backend strategy (e.g. Ethena yield routing)
+- 🔲 Finalize chain for redemption (EDUChain vs Arbitrum)
+- 🔲 UX for cooldown → claim flow
+- 🔲 Backend integrations with USDX yield
 
 ### Smart Contracts
 - 🔲 ERC20: OCUSD (mintable, burnable)
 - 🔲 ERC4626: sOCUSD
-- 🔲 Strategy management interface
-- 🔲 Yield streaming logic
-- 🔲 Cooldown + claim mechanism
+- 🔲 Strategy manager / registry
+- 🔲 Reward injection logic
+- 🔲 Cooldown + async claim
 
 ### Backend / Admin
-- 🔲 Reward streaming script
-- 🔲 NAV and performance dashboard
-- 🔲 Admin panel (pause, fees, governance actions)
+- 🔲 Manual yield streaming script
+- 🔲 Strategy monitoring + NAV dashboard
+- 🔲 Admin dashboard (pause, config)
 
 ---
 
-## 🧪 Fork Comparison
+## 🧪 Strategy Fork Comparison
 
 | Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Notes            |
 |----------|----------------|---------------|----------|----------------|---------|------------------|
-| Ethena   | ✅             | ✅            | ✅       | ✅             | None    | Preferred option |
-| USDX     | ✅             | ✅            | ✅       | ✅             | None    | Viable fallback  |
+| Ethena   | ✅             | ✅            | ✅       | ✅             | None    | Proven model     |
+| USDX     | ✅             | ✅            | ✅       | ✅             | None    | Day 1 target     |
 | Anzen    | ✅             | ✅            | ❌       | ❌             | Unknown | Lower control    |
-| USDa     | ❌             | ✅ (sUSDa)    | ✅       | Partial        | Unknown | Minting limited  |
+| USDa     | ❌             | ✅ (sUSDa)    | ✅       | Partial        | Unknown | Minting gated    |
 
 ---
 
@@ -106,35 +114,34 @@ Users deposit USDT/USDC → mint OCUSD → stake OCUSD → earn yield from exter
 
 ### OCUSD (ERC20)
 
-**P0:**
-- Mintable by permissioned address
-- Role-based minter logic
-- Burn/redeem function
-- Governance: pause, blacklist, minter roles
+**P0**
+- Mintable by whitelisted role
+- Burn/redeem logic
+- Admin role: pause, blacklist, governance settings
 
-**P1:**
-- Optional OFT compatibility (LayerZero)
+**P1**
+- Optional OFT support (LayerZero compatibility)
 
 ---
 
-### Minting / Sales Contract
+### Minting / Buy Contract
 
-**P0:**
-- Functions: `buy()`, `claim()`, `redeem()`, `cooldown()`
+**P0**
+- `buy()`, `cooldown()`, `claim()`, `redeem()`
 - Configurable fees
-- Cooldown period setting
-- List of accepted stablecoins
+- Cooldown timing
+- Accept USDT only (USDC excluded on Day 1)
 
 ---
 
-### ERC4626 Vault (sOCUSD / sEDU)
+### ERC4626 Vault (sOCUSD)
 
-**P0:**
-- Cooldown initiation: `cooldownAssets()` / `cooldownShares()`
-- Redemption via `claim()` or `unstake()`
-- APY previews: `previewWithdraw()` / `getAmountByShares()`
-- Yield injection: `transferInRewards()` via `REWARDER_ROLE`
-- Governance parameters
+**P0**
+- `cooldownAssets()` or `cooldownShares()`
+- `claim()` or `unstake()` after delay
+- `previewWithdraw()`, `getAmountByShares()`
+- `transferInRewards()` callable by `REWARDER_ROLE`
+- Governance configurability
 
 ---
 
@@ -142,49 +149,75 @@ Users deposit USDT/USDC → mint OCUSD → stake OCUSD → earn yield from exter
 
 ### Mint / Buy Page
 
-**Features:**
-- Convert USDT/USDC to OCUSD
-- Display rates, balances, and slippage
-- Gas estimator
-- Wallet integrations
+**Inspiration**: USDX, Ethena, Anzen
+
+**Features**
+- Input: USDT → Output: OCUSD
+- Conversion rates and slippage display
+- Wallet + gas estimator
+- Transaction preview
+- Show “Max Slippage” and “Est. Gas”
+
+---
 
 ### Stake Page – sOCUSD
 
-**Features:**
-- Stake OCUSD → sOCUSD
-- Show APY, rewards, cooldown
-- NAV and reward tracking
+**Features**
+- Stake OCUSD → Receive sOCUSD
+- Show APY, vault balance, sOCUSD price
+- Cooldown + claim UX
+- Yield graph or accumulated NAV growth
 
-### Stake Page – sEDU
+---
 
-**Features:**
-- Stake EDU → sEDU
-- Show capital growth and DeFi integrations
-- Configurable cooldown period
+### Collateral / Transparency Page (V2)
 
-### Collateral Page (V2)
-
-**Features:**
-- OCUSD collateral breakdown
-- List of active yield strategies
-- NAV and fund transparency
+**Features**
+- OCUSD total collateral
+- Yield strategy breakdown (e.g., USDX % exposure)
+- Vault NAV and claim buffer
+- Multisig yield logs (manual top-ups)
 
 ---
 
 ## 🔄 User Flow
 
-### Stablecoin Flow
-1. Deposit USDT/USDC
-2. Mint OCUSD
-3. Stake OCUSD → sOCUSD
-4. Earn yield
-5. Initiate cooldown
-6. Claim and withdraw
+### USDT Users
 
-### EDU Flow
-1. Stake EDU → sEDU
-2. Use in DeFi
-3. Unstake after cooldown
+1. Deposit USDT  
+2. Mint OCUSD (on Arbitrum or EDUChain)  
+3. Stake OCUSD → Receive sOCUSD  
+4. Yield accumulates over time (auto-compounded into share price)  
+5. Initiate cooldown  
+6. Claim OCUSD → Withdraw (on EDUChain only)
+
+---
+
+## ⏱ Redemption & Cooldown Logic
+
+- **Minting** can be done on both **Arbitrum and EDUChain**
+- **Redemption** must be completed on **EDUChain only**
+- Cooldown period: **1 day**
+- User initiates `cooldown()`, waits required time
+- Calls `claim()` after cooldown period to redeem OCUSD
+- Backend can unwind positions or sync oracle pricing in the interim
+
+---
+
+## 💱 Stablecoin Support
+
+- **Day 1**: USDT only  
+- **Future**: Optional USDC support via market rate conversion, with exchange rate risk caveats
+
+---
+
+## 🎯 Points System Considerations
+
+- Day 1: Do not design around protocols offering points unless integrated manually
+- Future: Consider allowing points tracking via:
+  - Yield strategy metadata
+  - External integration (Galxe, Dune, CSV export)
+- Communicate to users if no points are supported
 
 ---
 
@@ -193,35 +226,45 @@ Users deposit USDT/USDC → mint OCUSD → stake OCUSD → earn yield from exter
 - [User Journey](https://www.notion.so/USDC-USDT-EDU-Staking-Product-1ab4928fd54f803ba3a7de71db203000?pvs=21)
 - [Figma UI](https://www.figma.com/design/xk5z81PtVXToSb7WBqYUrq/EDU-Chain-projects?node-id=264-3195)
 - [Legal Brief](https://www.notion.so/EDUChain-Staking-Product-Legal-Brief-1-1fa4928fd54f803fb750e3a587e18ec0?pvs=21)
-- [Rings](https://rings.money/?ref=blog.soniclabs.com)
+- [USDX Buy](https://app.usdx.money/buy)
 
 ---
 
-## 📊 Yield Protocol Data
+## 📊 Yield Protocol Benchmarks
 
-### Lending Pools
+| Pool           | Project          | TVL     | APY    | 30d Avg |
+|----------------|------------------|---------|--------|---------|
+| USDC           | AAVE V3          | $43.7M  | 3.62%  | 3.52%   |
+| USDT           | Fluid Lending    | $17.6M  | 7.76%  | 7.43%   |
+| USDX           | Stables Labs     | $13.3M  | 11.53% | 8.29%   |
+| USDC           | Harmonix         | $5.2M   | 19.49% | 16.54%  |
+| USDC           | Peapods          | $4.0M   | 49.06% | 59.97%  |
 
-| Pool           | Project          | TVL     | APY    | Base APY | Reward APY | 30d Avg |
-|----------------|------------------|---------|--------|----------|------------|---------|
-| USDC           | AAVE V3          | $43.7M  | 3.62%  | 3.62%    | –          | 3.52%   |
-| USDC           | Fluid Lending    | $29.3M  | 6.40%  | 3.29%    | 3.11%      | 6.21%   |
-| USDT           | AAVE V3          | $18.8M  | 3.34%  | 3.34%    | –          | 3.59%   |
-| USDT           | Fluid Lending    | $17.6M  | 7.76%  | 2.57%    | 5.19%      | 7.43%   |
+---
 
-### Basis Trading Protocols
+## 🧠 Notes
 
-| Name                  | Chains | TVL     | Fees 7d | Fees 24h | Mcap/TVL |
-|-----------------------|--------|---------|---------|----------|-----------|
-| Stables Labs USDX     | 3      | $105.8M | $21,037 | $3,326   | –         |
-| Theo Network          | 4      | $10.7M  | –       | –        | –         |
-| BasisOS               | 1      | $5.0M   | $3,420  | $677     | 2.16      |
+- Vault will operate in **manual mode** with **multisig custody** for launch.
+- Future upgrade path: automate streaming + yield strategy management.
+- Redemption will **not** be instant due to backend unwind requirements and oracle lag.
 
-### RWA Protocols
+---
 
-| Name                 | Chains | TVL     | 30d Change | Revenue 24h | Mcap/TVL |
-|----------------------|--------|---------|------------|-------------|-----------|
-| Spiko                | 5      | $101.6M | +31.19%    | –           | –         |
-| Franklin Templeton   | 7      | $72.2M  | -31.24%    | –           | –         |
-| BlackRock BUIDL      | 6      | $31.1M  | +0.31%     | –           | 93.12     |
-| Ondo Finance         | 8      | $6.2M   | -7.44%     | $712        | 439.51    |
-| OpenEden             | 6      | $5.8M   | +0.91%     | $47         | –         |
+## 📌 Final Requirements (Dot Form)
+
+- Minting must be available on EDUChain and Arbitrum  
+- Redemption only allowed on EDUChain  
+- Redemption must include a cooldown (default: 1 day)  
+- Only USDT is supported for minting on Day 1  
+- OCUSD must be minted 1:1 against bridged USDT  
+- Yield is generated by deploying bridged USDT into external strategies (e.g. USDX)  
+- Multisig or backend agent must bridge USDT from **EDUChain to Arbitrum** via Canonical Bridge  
+- Manual yield streaming must be supported via `transferInRewards()`  
+- Vault must be an ERC4626 implementation (sOCUSD)  
+- Vault must reflect yield via capital appreciation (non-rebasing)  
+- Users must be able to stake and initiate cooldown via UI  
+- Admin must be able to pause mint/redeem  
+- Fee support must be configurable  
+- Redemption max limit must be enforced  
+- Redemption must not be possible during cooldown period  
+- All interactions must emit relevant events for frontend tracking
