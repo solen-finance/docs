@@ -1,15 +1,17 @@
 # USDT Staking Vault – EDUChain
 
+---
+
 ## 🎯 Goals
 
 1. **Increase Stablecoin TVL on EDUChain**
    - Attract USDT/USDC from Arbitrum and other chains.
    - Users mint OCUSD on EDUChain using bridged stables.
-   - Consider restricting withdrawals of OCUSD to EDUChain only (to encourage liquidity retention).
+   - Consider restricting OCUSD withdrawals to EDUChain to retain liquidity.
 
 2. **Deliver Sustainable Yield for Stablecoin Holders**
-   - Deploy bridged USDT/USDC into off-chain or L2 strategies (e.g. Ethena, USDX).
-   - Return yield manually via REWARDER_ROLE calls to on-chain vaults.
+   - Deploy bridged stables into off-chain or L2 strategies (e.g., Ethena, USDX).
+   - Return yield via `REWARDER_ROLE` calls to on-chain vaults.
 
 ---
 
@@ -17,176 +19,181 @@
 
 Users deposit USDT/USDC → mint **OCUSD** → stake OCUSD → earn yield from externally deployed strategies.
 
-This follows a similar model to [Ethena](https://www.notion.so/Ethena-Fork-EDUChain-1fa4928fd54f80e88bf7d39fd40af362?pvs=21) or USDX.
+Model inspired by [Ethena](https://www.notion.so/Ethena-Fork-EDUChain-1fa4928fd54f80e88bf7d39fd40af362?pvs=21) and USDX.
 
 ---
 
 ## 🔑 Key Features
 
-- **ERC20 Stablecoin: OCUSD**
+- **OCUSD (ERC20 Stablecoin)**
   - Minted from USDT or USDC
-  - Redeemable via cooldown process
+  - Redeemable with cooldown
 
-- **ERC4626 Vault: sOCUSD**
-  - Yield-bearing token (capital appreciating)
-  - Requires cooldown + `claim()` flow
+- **sOCUSD (ERC4626 Vault Token)**
+  - Capital-appreciating yield-bearing token
+  - Cooldown & claim flow
 
 - **Manual Yield Streaming**
-  - Yield streamed by multisig/backend using `transferInRewards()`
-  - Controlled by `REWARDER_ROLE`
+  - Admin/multisig streams yield via `transferInRewards()`
+  - Controlled via `REWARDER_ROLE`
 
-- **Governance Parameters**
-  - Fee configuration, minter roles, pause, blacklists
+- **Governance Configs**
+  - Fees, minters, pause, blacklist, etc.
 
 ---
 
-## 📋 Tasks
+## 📋 Task Overview
 
 ### Protocol Review
 - ✅ Review Ethena/USDX contracts
-- ✅ Identify licensing issues (none for Ethena/USDX)
-- ✅ Confirm staking vault and minting logic
+- ✅ Confirm no licensing issues
+- ✅ Align minting and staking logic
 
-### Architecture & Product Design
-- 🔲 Decide if redemption occurs on Arbitrum or EDUChain
-- 🔲 Define OCUSD mint/redeem cooldown UX
-- 🔲 Model backend off-chain yield strategy (e.g. Ethena → USDT yield)
+### Architecture / Product
+- 🔲 Choose where redemption occurs (Arbitrum vs EDUChain)
+- 🔲 Define cooldown UX
+- 🔲 Design backend strategy (e.g., Ethena yield routing)
 
-### Contract Implementation
+### Smart Contracts
 - 🔲 Mintable ERC20 (OCUSD)
-- 🔲 ERC4626 vault (sOCUSD)
-- 🔲 Yield reward injection mechanism
-- 🔲 Cooldown logic with `claim()`
+- 🔲 ERC4626 Vault (sOCUSD)
+- 🔲 Yield injection flow
+- 🔲 Cooldown + claim logic
 
 ### Backend / Admin
-- 🔲 Script for streaming rewards periodically
-- 🔲 NAV tracking or off-chain dashboard
-- 🔲 Admin panel for pause, fees, governance changes
+- 🔲 Script for yield streaming
+- 🔲 NAV dashboard
+- 🔲 Admin panel (pause, fees, roles)
 
 ---
 
-## 🧪 Fork Options Comparison
+## 🧪 Fork Comparison
 
-| Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Comments               |
-|----------|----------------|----------------|----------|----------------|---------|------------------------|
-| Ethena   | ✅             | ✅             | ✅       | ✅             | None    | Preferred – robust     |
-| USDX     | ✅             | ✅             | ✅       | ✅             | None    | Viable fork target     |
-| Anzen    | ✅             | ✅             | ❌       | ❌             | Unknown | Less control           |
-| USDa     | ❌             | ✅ (sUSDa)     | ✅       | Partial        | Unknown | Limited mint access    |
+| Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Notes               |
+|----------|----------------|---------------|----------|----------------|---------|---------------------|
+| Ethena   | ✅             | ✅            | ✅       | ✅             | None    | Preferred option    |
+| USDX     | ✅             | ✅            | ✅       | ✅             | None    | Viable alternative  |
+| Anzen    | ✅             | ✅            | ❌       | ❌             | Unknown | Less control        |
+| USDa     | ❌             | ✅ (sUSDa)    | ✅       | Partial        | Unknown | Limited mint access |
 
----
-
-> 🟨 **Priority: Medium**
->
-> This is an R&D product track that could evolve into a flagship offering for attracting yield-seeking stables to EDUChain.
+> 🟨 **Priority: Medium**  
+> R&D product that could evolve into a flagship EDUChain yield strategy.
 
 ---
 
 ## 🔧 Smart Contract Requirements
 
-### ERC20 Contract (OCUSD)
+### OCUSD (ERC20)
 
 **P0 (Must Have):**
-- Mintable only by a permissioned address
-- `isMinter` role management
-- Burn/redemption function
-- Governance params: blacklist (optional), pause
+- Mintable by permissioned address
+- Role-based minter system
+- Burn/redeem function
+- Blacklist, pause, governance parameters
 
 **P1 (Nice to Have):**
 - OFT-compatible (LayerZero)
 
 ---
 
-### ERC20 Minting/Sales Contract
+### Minting / Sales Contract
 
-**P0 (Must Have):**
-- `buy()`, `claim()`, `redeem()` / `cooldown()` methods
+**P0:**
+- Methods: `buy()`, `claim()`, `redeem()`, `cooldown()`
 - Fee config
-- Settable cooldown time
-- List of supported stablecoins
+- Cooldown settings
+- Whitelist of accepted stables (USDT/USDC)
 
-**Examples:**
-- USDX Sale Contract: `0xb45c42Fbf8AF8Df5A1fa080A351E9B2F8e0a56D1`
+Example: USDX Sale Contract  
+`0xb45c42Fbf8AF8Df5A1fa080A351E9B2F8e0a56D1`
 
 ---
 
-### ERC4626 Vault Contract (sOCUSD / sEDU)
+### ERC4626 Vault (sOCUSD / sEDU)
 
 **P0 (Must Have):**
-- Cooldown initiation (`cooldownAssets()` or `cooldownShares()`)
-- Claim after cooldown (`unstake()` or `claim()`)
-- `previewWithdraw()` or `getAmountByShares()`
-- `REWARDER_ROLE` with `transferInRewards()`
+- Cooldown start: `cooldownAssets()` / `cooldownShares()`
+- Withdraw: `claim()` or `unstake()`
+- Previews: `previewWithdraw()`, `getAmountByShares()`
+- Yield injection via `REWARDER_ROLE`
 - Configurable governance params
 
 ---
 
 ## 🖥️ UI/UX Requirements
 
-### Mint/Buy Page
+### Mint / Buy Page
 
 **Inspiration:**
 - USDX, Ethena, Avalon, Anzen
 
 **Features:**
-- Swap USDT/USDC for OCUSD
-- Live conversion rate, user balances
-- Wallet integration, gas estimator
+- USDT/USDC → OCUSD
+- Live rates, wallet balances
+- Wallet integration (MetaMask, WalletConnect)
+- Gas estimator
 
 ---
 
-### Stake Page (sOCUSD)
+### Stake Page – sOCUSD
 
 **Inspiration:**
 - Ethena Earn, USDX Stake
 
 **Features:**
 - Stake OCUSD → sOCUSD
-- Show APY, rewards, duration
-- Cooldown + claim support
-- NAV and yield tracking
+- Show APY, yield stats
+- Cooldown/claim support
+- NAV + reward tracking
 
 ---
 
-### EDU Stake Page (sEDU)
+### Stake Page – sEDU
 
 **Inspiration:**
 - Mycelium Stake
 
 **Features:**
 - Stake EDU → sEDU (non-rebasing)
-- Track real-time yield
-- Display DeFi integrations (leverage)
-- Configurable cooldown period
+- Live yield display
+- Recursive DeFi integrations
+- Cooldown period settings
 
 ---
 
-### Collateral Backing Page (V2)
+### Collateral Transparency (V2)
 
 **Inspiration:**
 - USDX Dashboard
 
 **Features:**
-- Total OCUSD collateral breakdown
-- External yield strategies & NAV
-- Governance-controlled fund transparency
+- Collateral backing breakdown
+- Strategy exposure, NAV
+- Transparent governance reports
 
 ---
 
 ## 🔄 User Flow
 
-### USDT/USDC Users
+### For USDT/USDC Users
 
-1. Deposit → receive OCUSD
-2. Stake OCUSD → receive sOCUSD
-3. Earn yield via vaults
-4. Initiate cooldown → call `claim()` → withdraw
+1. Deposit stable → Mint OCUSD  
+2. Stake OCUSD → Receive sOCUSD  
+3. Earn external yield  
+4. Cooldown → Claim → Withdraw
 
-### EDU Users
+### For EDU Users
 
-1. Stake EDU → receive sEDU (capital-appreciating LST)
-2. Use sEDU in recursive DeFi
-3. Unstake after cooldown to exit
+1. Stake EDU → Get sEDU  
+2. Use sEDU across DeFi  
+3. Unstake after cooldown
+
+---
+
+## 💭 Open Questions
+
+- Should we support both USDT and USDC? (Exchange rate complexity)
+- How should we handle points from external yield protocols?
 
 ---
 
@@ -196,3 +203,59 @@ This follows a similar model to [Ethena](https://www.notion.so/Ethena-Fork-EDUCh
 - [Figma UI](https://www.figma.com/design/xk5z81PtVXToSb7WBqYUrq/EDU-Chain-projects?node-id=264-3195)
 - [Legal Brief](https://www.notion.so/EDUChain-Staking-Product-Legal-Brief-1-1fa4928fd54f803fb750e3a587e18ec0?pvs=21)
 - [Rings Reference](https://rings.money/?ref=blog.soniclabs.com)
+
+---
+
+## 📊 Yield Protocols & Lending Pools
+
+
+### USDC/USDT Lending Pools Overview
+
+| Pool                                      | Project           | TVL     | APY     | Base APY | Reward APY | 7d Base APY | 30d Avg APY |
+|------------------------------------------|-------------------|---------|---------|----------|------------|-------------|-------------|
+| USDC                                      | AAVE V3           | $43.73m | 3.62%   | 3.62%    |            |             | 3.52%       |
+| USDC                                      | Fluid Lending     | $29.32m | 6.40%   | 3.29%    | 3.11%      |             | 6.21%       |
+| USDT                                      | AAVE V3           | $18.81m | 3.34%   | 3.34%    |            |             | 3.59%       |
+| USDT                                      | Fluid Lending     | $17.57m | 7.76%   | 2.57%    | 5.19%      |             | 7.43%       |
+| USDX (7 days unstaking)                   | Stables Labs U    | $13.32m | 11.53%  | 11.53%   |            |             | 8.29%       |
+| USDC                                      | Gains Network     | $10.57m | 8.00%   | 8.00%    |            |             | 10.26%      |
+| USDC                                      | Harmonix Finance  | $5.17m  | 19.49%  | 19.49%   |            |             | 16.54%      |
+| USDC                                      | Peapods Finance   | $3.97m  | 49.06%  | 49.06%   |            |             | 59.97%      |
+| GUSDC (For LP | Maturity 26JUN2025)       | Pendle            | $3.84m  | 8.68%   | 8.61%    | 0.07%      |             | 10.86%      |
+| GUSDC (For buying PT-gUSDC-26JUN2025)     | Pendle            | $3.84m  | 9.70%   | 9.70%    |            |             | 9.70%       |
+| USDC                                      | Compound V3       | $3.83m  | 4.50%   | 3.18%    | 1.33%      |             | 4.08%       |
+| USDT                                      | Compound V3       | $2.99m  | 4.47%   | 3.17%    | 1.30%      |             | 4.15%       |
+| SUSDX (LP on USDX | Maturity Jul 1)       | Spectra V2        | $2.01m  | 14.16%  | 9.95%    | 4.22%      |             | 14.81%      |
+| SUSDX (PT on USDX | Maturity Jul 1)       | Spectra V2        | $2.01m  | 15.39%  | 15.39%   |            |             | 15.34%      |
+| USDC                                      | Beefy             | $1.8m   | 4.43%   |          |            |             | 4.01%       |
+| USDC                                      | DeltaPrime        | $1.17m  | 15.85%  | 15.85%   |            |             | 11.40%      |
+
+
+
+### Basis Trading Protocols on Arbitrum
+
+| Rank | Name                    | Chains   | 1d Change | 7d Change | 1m Change | TVL       | Fees 7d | Revenue 7d | Mcap/TVL | Fees 24h | Fees 30d | Revenue 24h |
+|------|-------------------------|----------|-----------|-----------|-----------|-----------|---------|------------|----------|-----------|-----------|--------------|
+| 1    | Stables Labs USDX       | 3 chains | +0.01%    | 0%        | +1.18%    | $105.81m  | $21,037 | –          | –        | $3,326    | $87,643   | –            |
+| 2    | Theo Network            | 4 chains | -0.29%    | +0.59%    | +0.14%    | $10.68m   | –       | –          | –        | –         | –         | –            |
+| 3    | ZEROBASE CeDeFi        | 7 chains | -0.41%    | +129%     | –         | $10.51m   | –       | –          | –        | –         | –         | –            |
+| 4    | BasisOS                | 1 chain  | -1.02%    | +5.30%    | –         | $5.02m    | $3,420  | $3,420     | 2.16     | $677      | $12,217   | $677          |
+| 5    | Solv Basis Trading     | 8 chains | -0.38%    | +1.92%    | -81.15%   | $195,263  | –       | –          | –        | –         | –         | –            |
+| 6    | Umoja yBTC             | 2 chains | -1.24%    | +3.80%    | +6.18%    | $99,011   | –       | –          | –        | –         | –         | –            |
+| 7    | DeSyn Basis Trading    | 15 chains| –         | –         | –         | $0        | –       | –          | –        | –         | –         | –            |
+
+
+
+### RWA Protocol Rankings (Arbitrum)
+
+| Rank | Name                | Chains   | 1d Change | 7d Change | 1m Change | TVL       | Fees 7d | Revenue 7d | Mcap/TVL | Fees 24h | Fees 30d | Revenue 24h |
+|------|---------------------|----------|-----------|-----------|-----------|-----------|---------|------------|-----------|-----------|------------|--------------|
+| 1    | Spiko               | 5 chains | +0.79%    | +7.20%    | +31.19%   | $101.55m  |         |            |           |           |            |              |
+| 2    | Franklin Templeton  | 7 chains | -4.87%    | -12.11%   | -31.24%   | $72.17m   |         |            |           |           |            |              |
+| 3    | Dinari              | 7 chains | < 0.0001% | –         | -2.95%    | $31.83m   |         |            |           |           |            |              |
+| 4    | BlackRock BUIDL     | 6 chains | +0.01%    | +0.07%    | +0.31%    | $31.14m   |         |            | 93.12     |           |            |              |
+| 5    | Ondo Finance        | 8 chains | -0.19%    | -1.13%    | -7.44%    | $6.18m    | $4,997  | $4,997     | 439.51    | $712      | $21,825    | $712         |
+| 6    | OpenEden            | 6 chains | 0%        | 0%        | +0.91%    | $5.8m     | $333    |            |           | $47       | $1,417     |              |
+| 7    | Centrifuge Protocol | 3 chains | +0.01%    | +0.09%    | +75.15%   | $5.41m    |         |            |           |           |            |              |
+| 8    | Estate Protocol     | 1 chain  | -0.01%    | -0.01%    | +3.22%    | $4.77m    |         |            |           |           |            |              |
+| 9    | Mountain Protocol   | 6 chains | +0.03%    | -0.34%    | -87.28%   | $709,012  |         |            |           |           |            |              |
