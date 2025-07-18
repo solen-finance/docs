@@ -5,6 +5,7 @@
 ## 🎯 Goals
 
 1. **Increase Stablecoin TVL on EDUChain**
+
    - Attract USDT/USDC from Arbitrum and other chains.
    - Users mint OCUSD on EDUChain using bridged stables.
    - Restrict OCUSD withdrawals to EDUChain to retain liquidity.
@@ -17,57 +18,58 @@
 
 ## 📝 Product Concept
 
-Users deposit USDT → mint OCUSD → stake OCUSD → earn yield from externally deployed strategies like USDX.  
-Yield is not streamed directly to users, but accumulates in the vault, increasing sOCUSD’s value over time.
+Users deposit USDT → mint OCUSD → earn yield from externally deployed strategies.  
+Yield is not streamed directly to users, but accumulates in the vault, increasing OCUSD value over time.
 
-- **Minting** can occur on **EDUChain or Arbitrum**
-- **Redemption** is only available on **EDUChain**
+> **📋 Technical Implementation**: See [Architecture](./architecture) for detailed smart contract architecture and [Contract Addresses](./contracts) for deployment information.
 
 ---
 
 ## 🔑 Key Features
 
-- **OCUSD (ERC20 Stablecoin)**
-  - Minted from USDT
-  - Redeemable with cooldown
-  - Minting restricted to whitelisted stablecoin types (USDT only on Day 1)
+- **OCUSD (Yield-Bearing Stablecoin)**
+  - Deposit USDT to mint OCUSD at 1:1 ratio
+  - OCUSD value increases as yield accumulates
+  - Non-rebasing, capital-appreciating design
 
-- **sOCUSD (ERC4626 Vault Token)**
-  - Yield-bearing, capital-appreciating token
-  - Cooldown + claim process for redemptions
-  - Accumulated rewards reflected in increasing share value
+- **Yield Generation**
+  - Deployed into external yield strategies (initially USDX)
+  - Manual yield distribution via admin controls
+  - Transparent yield tracking
 
-- **Manual Yield Streaming**
-  - External yield is deposited to the vault manually via `transferInRewards()`
-  - Controlled by `REWARDER_ROLE` (multisig or backend agent)
+- **Security & Safety**
+  - Cooldown periods for redemptions
+  - Multi-signature governance
+  - Pausable operations for emergency scenarios
 
-- **Governance Parameters**
-  - Configurable fees
-  - Admin/minter role controls
-  - Blacklist and pause functionality
-
-- **Async Redemption**
-  - Redemptions delayed (e.g. 24h) to prevent oracle mismatch arbitrage and enable backend unwinding of positions
+- **User Experience**
+  - Simple deposit/withdraw interface
+  - Clear APY and performance metrics
+  - Async redemption with status tracking
 
 ---
 
 ## 🧩 Strategy Management
 
 ### Day 1 Setup
+
 - Use a single yield strategy: **USDX** (requires USDT input)
 
 ### Future Flexibility
+
 - Ability to:
   - Add new yield strategies
   - Deprecate or disable old ones
   - Reallocate funds between strategies
 
 ### Architecture
+
 - Strategy registry or controller contract
 - Strategy interface for plug-and-play backends
 - Admin-governed list of active yield sources
 
 ### Governance
+
 - Managed via `REWARDER_ROLE` and other role-based permissions
 - NAV tracking and strategy enable/disable toggles
 
@@ -76,16 +78,19 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 ## 📋 Task Overview
 
 ### Protocol Review
+
 - ✅ Review USDX, Ethena, and other strategy options
 - ✅ Confirm licensing is permissive
 - ✅ Validate staking vault logic
 
 ### Architecture / Product
+
 - 🔲 Finalize chain for redemption (EDUChain vs Arbitrum)
 - 🔲 UX for cooldown → claim flow
 - 🔲 Backend integrations with USDX yield
 
 ### Smart Contracts
+
 - 🔲 ERC20: OCUSD (mintable, burnable)
 - 🔲 ERC4626: sOCUSD
 - 🔲 Strategy manager / registry
@@ -93,6 +98,7 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 - 🔲 Cooldown + async claim
 
 ### Backend / Admin
+
 - 🔲 Manual yield streaming script
 - 🔲 Strategy monitoring + NAV dashboard
 - 🔲 Admin dashboard (pause, config)
@@ -101,47 +107,35 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 
 ## 🧪 Strategy Fork Comparison
 
-| Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Notes            |
-|----------|----------------|---------------|----------|----------------|---------|------------------|
-| Ethena   | ✅             | ✅            | ✅       | ✅             | None    | Proven model     |
-| USDX     | ✅             | ✅            | ✅       | ✅             | None    | Day 1 target     |
-| Anzen    | ✅             | ✅            | ❌       | ❌             | Unknown | Lower control    |
-| USDa     | ❌             | ✅ (sUSDa)    | ✅       | Partial        | Unknown | Minting gated    |
+| Protocol | Mintable ERC20 | ERC4626 Vault | Cooldown | Manual Rewards | License | Notes         |
+| -------- | -------------- | ------------- | -------- | -------------- | ------- | ------------- |
+| Ethena   | ✅             | ✅            | ✅       | ✅             | None    | Proven model  |
+| USDX     | ✅             | ✅            | ✅       | ✅             | None    | Day 1 target  |
+| Anzen    | ✅             | ✅            | ❌       | ❌             | Unknown | Lower control |
+| USDa     | ❌             | ✅ (sUSDa)    | ✅       | Partial        | Unknown | Minting gated |
 
 ---
 
-## 🔧 Smart Contract Requirements
+## 🔧 Product Requirements
 
-### OCUSD (ERC20)
+### Phase 0 (Launch)
 
-**P0**
-- Mintable by whitelisted role
-- Burn/redeem logic
-- Admin role: pause, blacklist, governance settings
+- **Core Functionality**
+  - USDT deposits and OCUSD minting
+  - Redemption with cooldown periods
+  - Manual yield distribution
+  - Basic governance controls
 
-**P1**
-- Optional OFT support (LayerZero compatibility)
+- **Security Features**
+  - Pausable operations
+  - Role-based access control
+  - Cooldown enforcement
 
----
+### Phase 1 (Post-Launch)
 
-### Minting / Buy Contract
-
-**P0**
-- `buy()`, `cooldown()`, `claim()`, `redeem()`
-- Configurable fees
-- Cooldown timing
-- Accept USDT only (USDC excluded on Day 1)
-
----
-
-### ERC4626 Vault (sOCUSD)
-
-**P0**
-- `cooldownAssets()` or `cooldownShares()`
-- `claim()` or `unstake()` after delay
-- `previewWithdraw()`, `getAmountByShares()`
-- `transferInRewards()` callable by `REWARDER_ROLE`
-- Governance configurability
+- Cross-chain compatibility considerations
+- Additional stablecoin support evaluation
+- Automated yield streaming exploration
 
 ---
 
@@ -152,6 +146,7 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 **Inspiration**: USDX, Ethena, Anzen
 
 **Features**
+
 - Input: USDT → Output: OCUSD
 - Conversion rates and slippage display
 - Wallet + gas estimator
@@ -163,6 +158,7 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 ### Stake Page – sOCUSD
 
 **Features**
+
 - Stake OCUSD → Receive sOCUSD
 - Show APY, vault balance, sOCUSD price
 - Cooldown + claim UX
@@ -173,6 +169,7 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 ### Collateral / Transparency Page (V2)
 
 **Features**
+
 - OCUSD total collateral
 - Yield strategy breakdown (e.g., USDX % exposure)
 - Vault NAV and claim buffer
@@ -184,11 +181,11 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 
 ### USDT Users
 
-1. Deposit USDT  
-2. Mint OCUSD (on Arbitrum or EDUChain)  
-3. Stake OCUSD → Receive sOCUSD  
-4. Yield accumulates over time (auto-compounded into share price)  
-5. Initiate cooldown  
+1. Deposit USDT
+2. Mint OCUSD (on Arbitrum or EDUChain)
+3. Stake OCUSD → Receive sOCUSD
+4. Yield accumulates over time (auto-compounded into share price)
+5. Initiate cooldown
 6. Claim OCUSD → Withdraw (on EDUChain only)
 
 ---
@@ -206,7 +203,7 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 
 ## 💱 Stablecoin Support
 
-- **Day 1**: USDT only  
+- **Day 1**: USDT only
 - **Future**: Optional USDC support via market rate conversion, with exchange rate risk caveats
 
 ---
@@ -232,13 +229,11 @@ Yield is not streamed directly to users, but accumulates in the vault, increasin
 
 ## 📊 Yield Protocol Benchmarks
 
-| Pool           | Project          | TVL     | APY    | 30d Avg |
-|----------------|------------------|---------|--------|---------|
-| USDC           | AAVE V3          | $43.7M  | 3.62%  | 3.52%   |
-| USDT           | Fluid Lending    | $17.6M  | 7.76%  | 7.43%   |
-| USDX           | Stables Labs     | $13.3M  | 11.53% | 8.29%   |
-
-
+| Pool | Project       | TVL    | APY    | 30d Avg |
+| ---- | ------------- | ------ | ------ | ------- |
+| USDC | AAVE V3       | $43.7M | 3.62%  | 3.52%   |
+| USDT | Fluid Lending | $17.6M | 7.76%  | 7.43%   |
+| USDX | Stables Labs  | $13.3M | 11.53% | 8.29%   |
 
 ---
 
@@ -254,53 +249,52 @@ This document provides a comprehensive overview of stablecoin yield opportunitie
 
 ## 🟢 Stablecoin + Staking
 
-| **Protocol**        | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL**     |
-|---------------------|----------------|--------------|----------------|---------------|--------------------|-------------|
-| USDX (Stables Labs) | USDX           | 11.53%       | Points Program              | 11.53%        | 8.26%              | $13.32M     |
- Harmonix Finance (Hyperliquid DN Vault)    | USDC           | 19.18%       | –              | 19.18%        | 16.80%             | $5.37M      |
+| **Protocol**                            | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL** |
+| --------------------------------------- | -------------- | ------------ | -------------- | ------------- | ------------------ | ------- |
+| USDX (Stables Labs)                     | USDX           | 11.53%       | Points Program | 11.53%        | 8.26%              | $13.32M |
+| Harmonix Finance (Hyperliquid DN Vault) | USDC           | 19.18%       | –              | 19.18%        | 16.80%             | $5.37M  |
+
 ---
 
 ## 💵 TBILLs
 
-| **Protocol**     | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL**  |
-|------------------|----------------|--------------|----------------|---------------|--------------------|----------|
-| Openeden USDO    | USDO           | 3.90%        | Points Program (BILLs)              | 3.90%         | –                  | $2.9M    |
+| **Protocol**  | **Stablecoin** | **Base APY** | **Reward APY**         | **Total APY** | **30-Day Avg APY** | **TVL** |
+| ------------- | -------------- | ------------ | ---------------------- | ------------- | ------------------ | ------- |
+| Openeden USDO | USDO           | 3.90%        | Points Program (BILLs) | 3.90%         | –                  | $2.9M   |
 
 ---
 
 ## 🔒 Crypto Risk-Free Rates
 
-| **Protocol**     | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL**     |
-|------------------|----------------|--------------|----------------|---------------|--------------------|-------------|
-| AAVE V3          | USDC           | 3.61%        | –              | 3.61%         | 3.51%              | $43.86M     |
-| Fluid Lending    | USDC           | 3.17%        | 3.20%          | 6.37%         | 6.24%              | $28.51M     |
-| Compound V3      | USDC           | 3.78%        | 1.24%          | 5.02%         | 4.10%              | $3.19M      |
-| Compound V3      | USDT           | 3.72%        | 1.29%          | 5.01%         | 4.27%              | $2.31M      |
+| **Protocol**  | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL** |
+| ------------- | -------------- | ------------ | -------------- | ------------- | ------------------ | ------- |
+| AAVE V3       | USDC           | 3.61%        | –              | 3.61%         | 3.51%              | $43.86M |
+| Fluid Lending | USDC           | 3.17%        | 3.20%          | 6.37%         | 6.24%              | $28.51M |
+| Compound V3   | USDC           | 3.78%        | 1.24%          | 5.02%         | 4.10%              | $3.19M  |
+| Compound V3   | USDT           | 3.72%        | 1.29%          | 5.01%         | 4.27%              | $2.31M  |
 
 ---
 
 ## 🧪 Yield Tokenized Instruments
 
-| **Protocol**         | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL**     |
-|----------------------|----------------|--------------|----------------|---------------|--------------------|-------------|
-| Pendle (LP 26JUN25)  | gUSDC          | 9.05%        | 0.07%          | 9.12%         | 10.68%             | $3.84M      |
-| Pendle (PT 26JUN25)  | gUSDC          | 9.66%        | –              | 9.66%         | 9.68%              | $3.84M      |
-| Spectra V2 (LP)      | sUSDX          | 10.63%       | 3.66%          | 14.29%        | 14.91%             | $2.07M      |
-| Spectra V2 (PT)      | sUSDX          | 15.33%       | –              | 15.33%        | 15.36%             | $2.07M      |
+| **Protocol**        | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL** |
+| ------------------- | -------------- | ------------ | -------------- | ------------- | ------------------ | ------- |
+| Pendle (LP 26JUN25) | gUSDC          | 9.05%        | 0.07%          | 9.12%         | 10.68%             | $3.84M  |
+| Pendle (PT 26JUN25) | gUSDC          | 9.66%        | –              | 9.66%         | 9.68%              | $3.84M  |
+| Spectra V2 (LP)     | sUSDX          | 10.63%       | 3.66%          | 14.29%        | 14.91%             | $2.07M  |
+| Spectra V2 (PT)     | sUSDX          | 15.33%       | –              | 15.33%        | 15.36%             | $2.07M  |
 
 ---
 
-
-
 ## Perp Swap Conterparty
-| Gains Network       | USDC           | 8.90%        | –              | 8.90%         | 10.06%             | $10.55M     |
+
+| Gains Network | USDC | 8.90% | – | 8.90% | 10.06% | $10.55M |
 
 ## DEX/LP-ing
 
-| **Protocol** | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL**     |
-|--------------|----------------|--------------|----------------|---------------|--------------------|-------------|
-| Peapods Finance     | USDC           | 47.66%       | –              | 47.66%        | 59.13%             | $3.99M      |
-
+| **Protocol**    | **Stablecoin** | **Base APY** | **Reward APY** | **Total APY** | **30-Day Avg APY** | **TVL** |
+| --------------- | -------------- | ------------ | -------------- | ------------- | ------------------ | ------- |
+| Peapods Finance | USDC           | 47.66%       | –              | 47.66%        | 59.13%             | $3.99M  |
 
 ---
 
@@ -315,11 +309,10 @@ https://fluid.io/lending/42161/USDT
 - Yields are subject to change. Check dApp interfaces for the latest values.
 
 > Data accurate as of June 2025. Always DYOR.
+
 ---
 
 > APYs are subject to change. Always DYOR before participating in any staking or yield farming activities.
-
-
 
 ## 🧠 Notes
 
@@ -327,26 +320,25 @@ https://fluid.io/lending/42161/USDT
 - Future upgrade path: automate streaming + yield strategy management.
 - Redemption will **not** be instant due to backend unwind requirements and oracle lag.
 
-
 https://defillama.com/protocols/RWA/Arbitrum
 
 ---
 
 ## 📌 Final Requirements (Dot Form)
 
-- Minting must be available on EDUChain and Arbitrum  
-- Redemption only allowed on EDUChain  
-- Redemption must include a cooldown (default: 1 day)  
-- Only USDT is supported for minting on Day 1  
-- OCUSD must be minted 1:1 against bridged USDT  
-- Yield is generated by deploying bridged USDT into external strategies (e.g. USDX)  
-- Multisig or backend agent must bridge USDT from **EDUChain to Arbitrum** via Canonical Bridge  
-- Manual yield streaming must be supported via `transferInRewards()`  
-- Vault must be an ERC4626 implementation (sOCUSD)  
-- Vault must reflect yield via capital appreciation (non-rebasing)  
-- Users must be able to stake and initiate cooldown via UI  
-- Admin must be able to pause mint/redeem  
-- Fee support must be configurable  
-- Redemption max limit must be enforced  
-- Redemption must not be possible during cooldown period  
+- Minting must be available on EDUChain and Arbitrum
+- Redemption only allowed on EDUChain
+- Redemption must include a cooldown (default: 1 day)
+- Only USDT is supported for minting on Day 1
+- OCUSD must be minted 1:1 against bridged USDT
+- Yield is generated by deploying bridged USDT into external strategies (e.g. USDX)
+- Multisig or backend agent must bridge USDT from **EDUChain to Arbitrum** via Canonical Bridge
+- Manual yield streaming must be supported via `transferInRewards()`
+- Vault must be an ERC4626 implementation (sOCUSD)
+- Vault must reflect yield via capital appreciation (non-rebasing)
+- Users must be able to stake and initiate cooldown via UI
+- Admin must be able to pause mint/redeem
+- Fee support must be configurable
+- Redemption max limit must be enforced
+- Redemption must not be possible during cooldown period
 - All interactions must emit relevant events for frontend tracking
