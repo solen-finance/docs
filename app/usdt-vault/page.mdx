@@ -12,7 +12,7 @@ This document explains how the vault works, how to earn yield, and what to expec
 
 ### OCUSD – Yield-Bearing Stablecoin
 
-- Minted with USDT (minus a small minting fee)
+- Minted with USDT (minus any minting fee)
 - Grows in value over time via rising share price (non-rebasing)
 - Backed by off-chain and L2 yield strategies (e.g. USDX)
 - Yield accrues automatically — no staking required
@@ -28,7 +28,7 @@ This document explains how the vault works, how to earn yield, and what to expec
 ## Getting Started
 
 1. **Deposit USDT** on Arbitrum or EDUChain
-2. **Mint OCUSD** (you receive OCUSD at current share price, minus the minting fee)
+2. **Mint OCUSD** (you receive OCUSD at current share price, any minting fee)
 3. **Hold OCUSD** — yield accrues automatically
 4. **Request withdrawal** (initiates cooldown)
 5. **Claim USDT** after the cooldown ends (on EDUChain)
@@ -95,9 +95,8 @@ While **user deposits and yield accrual happen continuously**, underlying strate
 ## Deposit Flow (Users)
 
 - Deposit USDT via Solen frontend
-- Receive OCUSD at current share price
+- Receive OCUSD at current share price, minus any minting fee
 - Start earning yield automatically
-- Minting fee applies to reduce drag and smooth out strategy latency
 
 ---
 
