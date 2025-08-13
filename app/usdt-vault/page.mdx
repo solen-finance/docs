@@ -2,9 +2,9 @@
 
 ## Overview
 
-The **USDT Vault** is the first product from Solen on EDUChain — a simple, real yield vault that converts USDT into OCUSD, a yield-bearing stablecoin. OCUSD is staked into a vault that earns passive returns from external strategies like **USDX** on Arbitrum.
+The **USDT Vault** is the first product from Solen on EDUChain — a simple, real yield vault that converts USDT into **OCUSD**, a yield-bearing stablecoin. OCUSD earns passive returns from external strategies like **USDX** on Arbitrum.
 
-This document covers how it works, how to earn, and what to expect.
+This document explains how the vault works, how to earn yield, and what to expect during withdrawals.
 
 ---
 
@@ -12,48 +12,39 @@ This document covers how it works, how to earn, and what to expect.
 
 ### OCUSD – Yield-Bearing Stablecoin
 
-- Minted 1:1 with USDT (minus a small minting fee)
+- Minted with USDT (minus a small minting fee)
 - Grows in value over time via rising share price (non-rebasing)
-- Backed by off-chain and L2 yield strategies
-
-### sOCUSD – Staking Vault Token
-
-- Stake OCUSD to receive sOCUSD (ERC4626 vault shares)
-- Yield accrues as the share price of sOCUSD increases
-- Withdrawals follow an epoch-based system
+- Backed by off-chain and L2 yield strategies (e.g. USDX)
+- Yield accrues automatically — no staking required
 
 ### Yield Source: USDX
 
-- Bridged USDT is deposited into **USDX** (Arbitrum-based stablecoin strategy)
+- Bridged USDT is deposited into **USDX** on Arbitrum
 - Yield is streamed back to EDUChain manually
-- Rewards compound back into the vault for stakers
+- Rewards are compounded into the vault to grow OCUSD share price
 
 ---
 
 ## Getting Started
 
-1. **Deposit USDT** via Solen frontend (Arbitrum or EDUChain)
-2. **Mint OCUSD** (1:1 ratio with minting fee)
-3. **Stake OCUSD** to receive sOCUSD
-4. **Yield accrues** automatically
-5. **Request unstake** (starts cooldown)
-6. **Claim OCUSD** after cooldown completes
-7. **Redeem OCUSD for USDT** (only on EDUChain)
+1. **Deposit USDT** on Arbitrum or EDUChain
+2. **Mint OCUSD** (you receive OCUSD at current share price, minus the minting fee)
+3. **Hold OCUSD** — yield accrues automatically
+4. **Request withdrawal** (initiates cooldown)
+5. **Claim USDT** after the cooldown ends (on EDUChain)
 
 ---
 
 ## Withdrawals & Epoch Timing
 
-Withdrawals follow an **epoch-based schedule**, with timing aligned to the external strategy’s unlock periods.
+Withdrawals are processed on an **epoch-based schedule**, aligned with the underlying strategy's unlock periods.
 
 | Step                | Detail                                 |
 |---------------------|----------------------------------------|
 | Cooldown Period     | Epoch-based (typically 7–15 days)      |
-| Claim Process       | Users must call `unstake()`, wait, then call `claim()` |
-| Redemption          | Available only on EDUChain             |
-| Coordination        | Batched by Solen team in sync with strategy cycles |
-
-Users will see **clear instructions in the frontend** on when to unstake and when to come back to claim.
+| Claim Process       | Call `requestWithdraw()`, then `claim()` later |
+| Redemption Location | USDT claims only supported on EDUChain |
+| Ops Coordination    | Handled by Solen team per strategy epoch |
 
 ---
 
@@ -62,7 +53,6 @@ Users will see **clear instructions in the frontend** on when to unstake and whe
 | Item             | Value                    |
 |------------------|--------------------------|
 | Stablecoin       | OCUSD                    |
-| Staking Token    | sOCUSD                   |
 | Decimals         | 6                        |
 | Mint Fee         | 0.2%                     |
 | Redeem Fee       | 0.5%                     |
@@ -82,7 +72,7 @@ Users will see **clear instructions in the frontend** on when to unstake and whe
 
 ### Launch
 
-- USDT → OCUSD → sOCUSD
+- USDT → OCUSD minting
 - Yield via USDX (Arbitrum)
 - Manual yield streaming to EDUChain
 
@@ -98,15 +88,15 @@ Users will see **clear instructions in the frontend** on when to unstake and whe
 
 Solen vault strategies run on a **weekly operational cycle** to handle bridging, staking, and reward harvesting.
 
-While **user deposits and yield accrual happen continuously**, underlying strategy movements are executed in defined epochs.
+While **user deposits and yield accrual happen continuously**, underlying strategy movements occur in discrete epochs.
 
 ---
 
 ## Deposit Flow (Users)
 
-- Deposit USDT anytime
-- Instantly receive OCUSD
-- Start earning yield immediately
+- Deposit USDT via Solen frontend
+- Receive OCUSD at current share price
+- Start earning yield automatically
 - Minting fee applies to reduce drag and smooth out strategy latency
 
 ---
@@ -116,19 +106,15 @@ While **user deposits and yield accrual happen continuously**, underlying strate
 - **Epoch Day (T0):**
   1. Bridge USDT to Arbitrum
   2. Mint USDX
-  3. Stake into sUSDX
+  3. Stake into sUSDX (USDX staking pool)
 
 ---
 
 ## Redemption Flow (Users)
 
-Withdrawals are tied to the cooldown/redemption cycle of the underlying strategy.
-
-- Users initiate a **redemption request** via `unstake()`
-- After the epoch ends, users must **call `claim()`** to retrieve OCUSD
-- OCUSD can then be redeemed for USDT on EDUChain
-
-All steps will be clearly shown in the UI.
+- Call `requestWithdraw()` to begin redemption
+- After the epoch ends, call `claim()` to receive USDT
+- Claiming is only available on EDUChain
 
 ---
 
@@ -149,10 +135,13 @@ All steps will be clearly shown in the UI.
 | USDX Cooldown     | T+8    | Begin 7-day unstake period               |
 | Final Return      | T+15   | USDT arrives back on EDUChain            |
 
-**Maximum wait time: 15 days**
+**Maximum wait time: ~15 days**
 
 ---
 
 ## Historical Yields
 
 - USDX strategies have historically generated **7–10% APY**
+
+---
+
