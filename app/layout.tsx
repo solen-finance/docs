@@ -11,7 +11,7 @@ export const metadata = {
 const navbar = (
   <Navbar
     logo={<b>Solen Protocol</b>}
-  // ... Your additional navbar options
+    // ... Your additional navbar options
   />
 );
 const footer = <Footer>Solen Protocol Documentation</Footer>;
@@ -39,7 +39,7 @@ export default async function RootLayout({ children }) {
           pageMap={await getPageMap()}
           docsRepositoryBase="https://github.com/educhain-yield/docs"
           footer={footer}
-        // ... Your additional layout options
+          // ... Your additional layout options
         >
           {children}
         </Layout>

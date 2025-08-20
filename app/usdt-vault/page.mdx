@@ -28,17 +28,17 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 
 ## Key Vault Parameters
 
-| Parameter           | Value                                   |
-|---------------------|------------------------------------------|
-| Vault Token         | OCUSD      |
-| Deposit Asset       | USDT                                     |
-| Yield Source        | Stablecoin strategies on Arbitrum One    |
-| Strategy Manager    | Solen Finance                            |
-| Cooldown Period     | default 15 days (epoch-based)            |
-| Minting Fee         | 0%                                       |
-| Redemption Fee      | 0.6%                                     |
-| Redemption Location | EDUChain only                            |
-| Contract Address    | `0x...` *(to be updated in UI)*          |
+| Parameter           | Value                                 |
+| ------------------- | ------------------------------------- |
+| Vault Token         | OCUSD                                 |
+| Deposit Asset       | USDT                                  |
+| Yield Source        | Stablecoin strategies on Arbitrum One |
+| Strategy Manager    | Solen Finance                         |
+| Cooldown Period     | default 15 days (epoch-based)         |
+| Minting Fee         | 0%                                    |
+| Redemption Fee      | 0.6%                                  |
+| Redemption Location | EDUChain only                         |
+| Contract Address    | `0x...` _(to be updated in UI)_       |
 
 ---
 
@@ -67,11 +67,11 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 
 ### Strategy Operations (Handled by Solen Finance)
 
-| Phase              | Description                                           |
-|--------------------|-------------------------------------------------------|
-| Bridge             | USDT bridged to Arbitrum One                          |
-| Deployment         | Deployed into stablecoin yield protocols              |
-| Yield Harvesting   | Yield harvested, converted back to USDT               |
+| Phase              | Description                                          |
+| ------------------ | ---------------------------------------------------- |
+| Bridge             | USDT bridged to Arbitrum One                         |
+| Deployment         | Deployed into stablecoin yield protocols             |
+| Yield Harvesting   | Yield harvested, converted back to USDT              |
 | Bridging Back      | Yield bridged to EDUChain and streamed to the vault  |
 | Share Price Update | OCUSD price increases based on net vault performance |
 
@@ -100,11 +100,13 @@ Solen’s contracts have been audited by **Certik**, but audits do not eliminate
 ## Roadmap
 
 **Live Now**
+
 - USDT deposits on EDUChain
 - OCUSD minting and automatic yield accrual
 - Epoch-based redemption
 
 **Coming Soon**
+
 - USDC vault support
 - Public analytics dashboard
 - Strategy rotation tools for dynamic APY optimization
