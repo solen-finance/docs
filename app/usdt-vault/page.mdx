@@ -21,7 +21,7 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
    - No need to stake or claim — holding OCUSD is enough.
 
 4. **Redemption Process**
-   - Users initiate a cooldown via `requestWithdraw()`.
+   - Users initiate a cooldown via clicking the "Redeem" button.
    - After the cooldown period (default 15 days), they can claim USDT on EDUChain.
 
 ---
@@ -44,9 +44,11 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 
 ## Deposit Flow (Users)
 
-![Deposit flow](./Deposit.png)
 
 - **Step 1**: Deposit USDT via the Solen frontend.
+
+![Deposit flow](./Deposit.png)
+
 - **Step 2**: Receive OCUSD at current share price, minus any mint fee.
 - **Step 3**: Start earning passive yield.
 
@@ -54,10 +56,22 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 
 ## Redemption Flow (Users)
 
-![Redeem flow](./Redeem.png)
 
-- **Step 1**: Call `requestWithdraw()` to initiate cooldown on the frontend.
+
+
+
+
+
+- **Step 1**: Click the "Redeem" button to initiate the redeem process. 
+
+![Redeem flow](./Redeem.png)
 - **Step 2**: Wait for cooldown period (default 15 days).
+
+![Pending flow](./Pending.png)
+
+- **Step 2.5**: In this time, you can't request another redeem.
+![Pending flow](./RedeemPending.png)
+
 - **Step 3**: Call `claim()` to receive USDT on EDUChain.
 - **Redemption Fee**: 0.6% of withdrawn amount.
 
