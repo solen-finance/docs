@@ -38,7 +38,7 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 | Minting Fee         | 0%                                    |
 | Redemption Fee      | 0.6%                                  |
 | Redemption Location | EDUChain only                         |
-| Contract Address    | `0x...` _(to be updated in UI)_       |
+| Contract Address    | `0x3C886065abf6E489071D0149b63d8EfD96906a7c` |
 
 ---
 
@@ -63,20 +63,6 @@ The **USDT Vault** is a passive yield product by Solen Finance on EDUChain. User
 
 ---
 
-## Vault Mechanics
-
-### Strategy Operations (Handled by Solen Finance)
-
-| Phase              | Description                                          |
-| ------------------ | ---------------------------------------------------- |
-| Bridge             | USDT bridged to Arbitrum One                         |
-| Deployment         | Deployed into stablecoin yield protocols             |
-| Yield Harvesting   | Yield harvested, converted back to USDT              |
-| Bridging Back      | Yield bridged to EDUChain and streamed to the vault  |
-| Share Price Update | OCUSD price increases based on net vault performance |
-
----
-
 ## Risks
 
 All vaults carry inherent risks. Key risks include:
@@ -85,34 +71,10 @@ All vaults carry inherent risks. Key risks include:
 - **Multisig Risk**: Assets are managed via a Solen-controlled multisig.
 - **Strategy Risk**: Involves exposure to third-party protocols with potential for depeg, slippage, or insolvency.
 
-Solen’s contracts have been audited by **Certik**, but audits do not eliminate all risk.
+Solen’s contracts have been audited, but audits do not eliminate all risk.
 
 ---
 
-## Admin Controls
-
-- Emergency pause: `PAUSER_ROLE`
-- Reward distribution: `REWARDER_ROLE`
-- Bridging and strategy updates handled by Solen team multisig
-
----
-
-## Roadmap
-
-**Live Now**
-
-- USDT deposits on EDUChain
-- OCUSD minting and automatic yield accrual
-- Epoch-based redemption
-
-**Coming Soon**
-
-- USDC vault support
-- Public analytics dashboard
-- Strategy rotation tools for dynamic APY optimization
-
----
-
-## Learn More
+## Go to App
 
 - [App](https://app.solen.finance)
