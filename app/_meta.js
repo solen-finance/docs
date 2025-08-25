@@ -1,6 +1,6 @@
 export default {
-  index: "Home",
-  "usdt-vault": "USDT Vault",
+  index: "About Solen",
+  "usdt-vault": "OCUSD (USDT Yield Vault)",
   tos: "Terms of Service",
   privacy: "Privacy Policy",
 };

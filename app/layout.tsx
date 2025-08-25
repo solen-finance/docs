@@ -10,7 +10,11 @@ export const metadata = {
 
 const navbar = (
   <Navbar
-    logo={<b>Solen Finance</b>}
+    logo={
+      <span>
+        <img src="/logo.png" alt="Solen Finance" style={{ height: 32, verticalAlign: "middle", marginRight: 8 }} />
+      </span>
+    }
   // ... Your additional navbar options
   />
 );
@@ -32,12 +36,13 @@ export default async function RootLayout({ children }) {
         <title>Docs | Solen Finance</title>
         <meta name="description" content="Solen Finance Documentation" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <body>
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/educhain-yield/docs"
+          docsRepositoryBase="https://github.com/solen-finance/docs"
           footer={footer}
         // ... Your additional layout options
         >
